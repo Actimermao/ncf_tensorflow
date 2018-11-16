@@ -72,6 +72,7 @@ if __name__ == '__main__':
     num_negatives = 4
     k = 10
     batch_size = 256
+    lr = 0.0006
     layers = [num_factors*8, num_factors*4, num_factors*2, num_factors]
     user_input, item_input, labels = get_train_instance()
 
@@ -104,7 +105,7 @@ if __name__ == '__main__':
     w.append(tf.Variable(tf.random_normal(shape=[layers[-1], 1], mean=0.0, stddev=0.01)))
     predict = tf.nn.sigmoid(tf.matmul(hidden[-1], w[-1]))
     loss = -tf.reduce_mean(yo*tf.log(tf.clip_by_value(predict, 1e-10, 1.0)) + (1-yo)*tf.log(tf.clip_by_value(1-predict, 1e-10, 1.0)))
-    train_step = tf.train.AdamOptimizer(learning_rate=0.001).minimize(loss)
+    train_step = tf.train.AdamOptimizer(learning_rate=lr).minimize(loss)
 
     with tf.Session() as sess:
         sess.run(tf.global_variables_initializer())
