@@ -48,7 +48,7 @@ def evaluate_one_rating(idx):
     for j in range(len(items)):
         item = items[j]
         map_item_score[item] = pre[j]
-    rankList = heapq.nlargest(k, map_item_score, key=map_item_score.get)
+    rankList = heapq.nlargest(topk, map_item_score, key=map_item_score.get)
     hr = getHitRatio(rankList, rating[1])
     ndcg = getNDCG(rankList, rating[1])
     return (hr, ndcg)
@@ -72,7 +72,7 @@ if __name__ == '__main__':
 
     num_factors = 8
     num_negatives = 4
-    k = 10
+    topk = 10
     batch_size = 256
     user_input, item_input, labels = get_train_instance(trainMatrix, num_negatives)
     #caculate the batch
@@ -97,8 +97,9 @@ if __name__ == '__main__':
 
     dense_input = tf.multiply(embed_user, embed_item)
     dense_w = tf.Variable(tf.random_normal(shape=[num_factors, 1], mean=0.0, stddev=0.01))
+    dense_b = tf.Variable(tf.constant(0.1, shape=[1, ]))
 
-    predict = tf.nn.sigmoid(tf.matmul(dense_input, dense_w))
+    predict = tf.nn.sigmoid(tf.matmul(dense_input, dense_w) + dense_b)
     # loss = -tf.reduce_sum(tf.multiply(yo, tf.log(predict)) + tf.multiply(1-yo, tf.log(1-predict)))
     loss = -tf.reduce_mean(yo*tf.log(tf.clip_by_value(predict, 1e-10, 1.0)) + (1-yo)*tf.log(tf.clip_by_value(1-predict, 1e-10, 1.0)))
     # train_step = tf.train.GradientDescentOptimizer(learning_rate=0.01).minimize(loss)
